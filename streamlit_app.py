@@ -2,15 +2,15 @@ import time
 import math
 from contextlib import nullcontext
 import numpy as np
-import torch
-import torch.nn as nn
-from torch.nn import functional as F
 import inspect
 from dataclasses import dataclass
 import streamlit as st
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Draw
+import torch
+import torch.nn as nn
+from torch.nn import functional as F
 
 
 eval_interval = 250 # keep frequent because we'll overfit
