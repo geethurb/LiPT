@@ -2,15 +2,15 @@ import time
 import math
 from contextlib import nullcontext
 import numpy as np
+import torch
+import torch.nn as nn
+from torch.nn import functional as F
 import inspect
 from dataclasses import dataclass
 import streamlit as st
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Draw
-import torch
-import torch.nn as nn
-from torch.nn import functional as F
 
 
 eval_interval = 250 # keep frequent because we'll overfit
@@ -33,7 +33,6 @@ dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported
 config_keys = [k for k,v in globals().items() if not k.startswith('_') and isinstance(v, (int, float, bool, str))]
 config = {k: globals()[k] for k in config_keys}
 master_process = True
-seed_offset = 0
 torch.backends.cuda.matmul.allow_tf32 = True # allow tf32 on matmul
 torch.backends.cudnn.allow_tf32 = True # allow tf32 on cudnn
 device_type = 'cuda' if 'cuda' in device else 'cpu' # for later use in torch.autocast
@@ -376,18 +375,18 @@ split_ratio = st.slider("Train-Test Split Ratio", min_value=0.01, max_value=0.99
 st.write("Train on {:.1f}% of data. Test on {:.1f}% of data.".format(split_ratio*100, 100-split_ratio*100))
 
 with col1:
-    max_iters = st.number_input("Training Iterations", min_value=1000, value=5000, step=1)
+    max_iters = st.number_input("Training Iterations", min_value=1000, value=4500, step=1)
     dropout = st.number_input("Dropout", min_value=0.0, max_value=0.9, value=0.05)
     learning_rate = st.number_input("Learning Rate", min_value=6e-5, max_value=1.0, value=1e-3, format="%.5f") # with baby networks can afford to go a bit higher
     
 with col2:
-    model_complexity = st.number_input("Model Complexity", min_value=1, value=6, step=1)
+    model_complexity = st.number_input("Model Complexity", min_value=1, value=3, step=1)
     grad_clip = st.number_input("Gradient Clipping", min_value=0.01, max_value=100.0, value=1.0) # clip gradients at this value, or disable if == 0.0
     temperature = st.number_input("Randomness of Generation", min_value=0.01, max_value=100.0, value=1.0) # 1.0 = no change, < 1.0 = less random, > 1.0 = more random, in predictions
 
 with col3:
     batch_size = st.number_input("Batch Size", min_value=2, value=64, step=1)
-    block_size = st.number_input("Block Size", min_value=2, value=256, step=1) # context of up to 256 previous characters
+    block_size = st.number_input("Context Window", min_value=2, value=256, step=1) # context of up to 256 previous characters
     num_samples = st.number_input(":violet[**Number of Molecules to Generate**]", min_value=1, value=20, step=1)
     
 tokens_per_iter = gradient_accumulation_steps * batch_size * block_size
