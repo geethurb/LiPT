@@ -10,7 +10,12 @@ from dataclasses import dataclass
 import streamlit as st
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import Draw
+try:
+    from rdkit.Chem import Draw
+    DRAW_IMPORT_ERROR = None
+except Exception as draw_import_error:
+    Draw = None
+    DRAW_IMPORT_ERROR = draw_import_error
 
 
 eval_interval = 250 # keep frequent because we'll overfit
@@ -577,7 +582,15 @@ if uploaded_file and st.button(":orange[**Train Model and Generate Molecules**]"
         st.download_button(label="Download CSV", data=csv_data, file_name="generated_smiles.csv", mime="text/csv")
         first_mol = Chem.MolFromSmiles(gen_smiles[0])
         if first_mol is not None:
-            st.image(Draw.MolToImage(first_mol, size=(600, 600)), caption='First Generated Molecule', use_column_width=True)
+            if Draw is None:
+                st.info("Molecule image preview is unavailable in this deployment environment.")
+                st.caption(f"RDKit drawing backend error: {DRAW_IMPORT_ERROR}")
+            else:
+                st.image(
+                    Draw.MolToImage(first_mol, size=(600, 600)),
+                    caption='First Generated Molecule',
+                    use_column_width=True,
+                )
 
     if len(gen_smiles) < target_samples:
         st.info(f"Generated {len(gen_smiles)} unique valid molecules out of requested {target_samples}.")
