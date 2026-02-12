@@ -14,7 +14,6 @@ LiPT is a Streamlit app for training a character-level GPT model on SMILES data 
 
 - Python 3.10+ recommended
 - Dependencies from `requirements.txt`
-- Additional runtime packages used by the app: `streamlit`, `pandas`, `numpy`
 
 ## Setup
 
@@ -27,7 +26,6 @@ python -m venv .venv
 ```powershell
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-pip install streamlit pandas numpy
 ```
 
 ### macOS/Linux
@@ -35,7 +33,6 @@ pip install streamlit pandas numpy
 ```bash
 source .venv/bin/activate
 pip install -r requirements.txt
-pip install streamlit pandas numpy
 ```
 
 ## Run
