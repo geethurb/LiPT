@@ -1,5 +1,6 @@
 numpy
 pandas
 rdkit
-streamlit
+streamlit>=1.54,<2
+altair>=5,<7
 torch
